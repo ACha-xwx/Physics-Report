@@ -4,7 +4,8 @@ import numpy as np
 import plotly.graph_objects as go
 import os
 
-# 1. 学术级全局配置
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 APP_TITLE = "自由落体实验数据集成分析与多维对标平台"
 M = 0.15  # 质量 (kg)
 G = 9.8  # 重力加速度
@@ -12,14 +13,11 @@ H = 5.0  # 初始高度
 
 st.set_page_config(page_title=APP_TITLE, layout="wide", initial_sidebar_state="expanded")
 
-# 2. 侧边栏导航与控制面板
 st.sidebar.header("导航与控制面板")
 st.sidebar.markdown("---")
 
-# 选择视图模式
 view_mode = st.sidebar.radio("模式选择", ["物理全景对标 (3D)", "数据深度分析 (2D)"])
 
-# 选择具体实验组次
 selected_exp_id = st.sidebar.selectbox(
     "选择实验组次",
     [i for i in range(1, 11)],
@@ -28,11 +26,8 @@ selected_exp_id = st.sidebar.selectbox(
 )
 
 st.sidebar.markdown("---")
-# 学术对标参数
 k_val = st.sidebar.slider("理论平方阻力系数 k", 0.0000, 0.0050, 0.0015, 0.0001, format="%.4f")
 
-
-# 数据加载与修正函数
 @st.cache_data
 def load_and_fix_data(file_path, window=21):
     df = pd.read_csv(file_path)
@@ -47,12 +42,9 @@ def load_and_fix_data(file_path, window=21):
     df['Delta_E_measured'] = E0 - df['E_total_fixed']
     return df
 
-
-# 3. 主体内容渲染
 st.title(APP_TITLE)
 st.markdown("---")
 
-# ================= 模式 1: 物理全景对标 (3D) =================
 if view_mode == "物理全景对标 (3D)":
     st.markdown("### 多实验组机械能损耗 3D 对标全景图")
     st.markdown("此视图展示全部 10 组实验数据的时空一致性。通过观察三维空间内机械能耗散轨迹的重合度，验证系统可复现性。")
@@ -91,7 +83,6 @@ if view_mode == "物理全景对标 (3D)":
         scene=dict(
             xaxis_title='下落时间 (s)', yaxis_title='实验组次', zaxis_title='耗散能量 ΔE (J)',
             xaxis=dict(showgrid=False, zeroline=False),
-            # 【修复点】：去掉了多余的 r
             yaxis=dict(tickvals=list(range(1, 11)), autorange="reversed", showgrid=False, zeroline=False),
             zaxis=dict(showgrid=False, zeroline=False),
             camera=dict(eye=dict(x=1.3, y=1.3, z=1.3))
@@ -100,7 +91,6 @@ if view_mode == "物理全景对标 (3D)":
     )
     st.plotly_chart(fig_3d, use_container_width=True)
 
-# ================= 模式 2: 数据深度分析 (2D) =================
 else:
     file_path = f"{selected_exp_id}_data.csv"
     st.markdown(f"### [实验组 {selected_exp_id}] 数据深度分析与验证")
