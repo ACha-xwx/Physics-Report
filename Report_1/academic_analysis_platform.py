@@ -55,7 +55,7 @@ if view_mode == "物理全景对标 (3D)":
                  '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
 
     for i in range(1, 11):
-        file_path = f"{i}_data.csv"
+        file_path = os.path.join(BASE_DIR, f"{i}_data.csv")
         if not os.path.exists(file_path): continue
         df = pd.read_csv(file_path)
 
@@ -92,7 +92,7 @@ if view_mode == "物理全景对标 (3D)":
     st.plotly_chart(fig_3d, use_container_width=True)
 
 else:
-    file_path = f"{selected_exp_id}_data.csv"
+    file_path = os.path.join(BASE_DIR, f"{selected_exp_id}_data.csv")
     st.markdown(f"### [实验组 {selected_exp_id}] 数据深度分析与验证")
     st.markdown(f"此视图专注于特定实验组数据的动力学与机械能守恒验证。通过调节理论 k 值，可进行多维对标。")
 
