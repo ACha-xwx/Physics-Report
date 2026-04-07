@@ -96,14 +96,17 @@ else:
         v_theory = vt * np.tanh(G * t / vt) if k_val > 0 else G * t
         E_theory = 0.5 * M * (v_theory ** 2) + M * G * (H - x_theory)
         Delta_E_theory = (M * G * H) - E_theory
-
+        E_theory = 0.5 * M * (v_theory ** 2) + M * G * (H - x_theory)
+        Delta_E_theory = (M * G * H) - E_theory
+        df_fixed['dy'] = df_fixed['y_smooth'].diff().fillna(0)
+        df_fixed['W_f_integral'] = (k_val * (df_fixed['v_fixed'] ** 2) * df_fixed['dy']).cumsum()
         from plotly.subplots import make_subplots
 
         fig_2d = make_subplots(rows=1, cols=3,
-                               subplot_titles=("动力学验证 (v-t)", "机械能衰减验证 (E-t)", "耗散能量对标 (ΔE-t)"))
+                               subplot_titles=("动力学验证 (v-t)", "机械能衰减验证 (E-t)", "耗散能量对比 (ΔE-t)"))
 
         fig_2d.add_trace(
-            go.Scatter(x=t, y=df_fixed['v_fixed'], name='实测速度 (已对齐)', line=dict(color='blue', width=2)), row=1,
+            go.Scatter(x=t, y=df_fixed['v_fixed'], name='实测速度', line=dict(color='blue', width=2)), row=1,
             col=1)
         fig_2d.add_trace(go.Scatter(x=t, y=v_theory, name='平方阻力理论曲线', line=dict(color='red', dash='dash')),
                          row=1, col=1)
@@ -124,7 +127,10 @@ else:
         fig_2d.add_trace(
             go.Scatter(x=t, y=Delta_E_theory, name='理论做功预测 (W_f)', line=dict(color='black', dash='dash')), row=1,
             col=3)
-
+        fig_2d.add_trace(
+            go.Scatter(x=t, y=df_fixed['W_f_integral'], name='实测路径积分做功 (∫fdy)',
+                       line=dict(color='#2ca02c', dash='dot', width=3)),
+            row=1, col=3)
         fig_2d.update_layout(template="plotly_white", hovermode="x unified", height=450, margin=dict(t=30))
         fig_2d.update_yaxes(title_text="速度 (m/s)", row=1, col=1)
         fig_2d.update_yaxes(title_text="绝对能量 (J)", row=1, col=2)
